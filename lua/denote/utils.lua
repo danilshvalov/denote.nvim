@@ -51,10 +51,6 @@ function M.desluggify(str)
   return str
 end
 
-function M.extract_id(str)
-  return utf8.match(str, const.id.regexp)
-end
-
 function M.date_to_time(str)
   local pattern = "(%d%d%d%d)(%d%d)(%d%d)T(%d%d)(%d%d)(%d%d)"
   local year, month, day, hour, min, sec = str:match(pattern)
@@ -68,6 +64,10 @@ function M.date_to_time(str)
   })
 end
 
+function M.extract_id(str)
+  return utf8.match(str, const.id.regexp)
+end
+
 function M.extract_title(filename)
   return M.desluggify(utf8.match(filename, "%-%-([^_.]+)"))
 end
@@ -75,15 +75,23 @@ end
 ---@param filename string
 ---@return string[]
 function M.extract_keywords(filename)
-  return vim.split(utf8.match(filename, "__([^.]+)"), "_", { trimempty = true })
+  return vim.split(
+    utf8.match(filename, "__([^.]+)") or "",
+    "_",
+    { trimempty = true }
+  )
 end
 
 function M.is_note(path)
   path = vim.fs.normalize(path)
-  local filename = vim.fs.basename(path) or ""
+  local filename = vim.fs.basename(path)
   return vim.fn.isdirectory(path) == 0
     and vim.fn.filereadable(path) == 1
     and utf8.match(filename, "^" .. const.id.regexp) ~= nil
+end
+
+function M.get_file_extension(path)
+  return utf8.match(path, "^.+(%..+)$")
 end
 
 function M.remove_duplicates(values)

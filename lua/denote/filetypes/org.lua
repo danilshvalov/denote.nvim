@@ -23,9 +23,6 @@ return {
       "#+filetags:   " .. serializer:keywords(),
       "#+identifier: " .. serializer:id(),
       "",
-      "* " .. utils.desluggify(serializer.note.title),
-      "",
-      "",
     }
   end,
   fields = {
