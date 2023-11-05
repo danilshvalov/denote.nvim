@@ -91,8 +91,9 @@ local function select_file(files)
   local titles = vim.iter(files):map(utils.extract_title):totable()
 
   local max_length = 0
-  for _, title in ipairs(titles) do
-    max_length = math.max(max_length, utf8.len(title))
+  for index, title in ipairs(titles) do
+    max_length =
+      math.max(max_length, utf8.len(title) + math.ceil(math.sqrt(index)))
   end
 
   return select_item(files, {
@@ -121,16 +122,29 @@ function M.select_note()
     local files = M.get_files()
     local titles = vim.iter(files):map(utils.extract_title):totable()
 
-    local max_length = 0
-    for _, title in ipairs(titles) do
-      max_length = math.max(max_length, utf8.len(title))
+    local find_offset = function(number)
+      local result = 0
+      while number >= 10 do
+        number = number / 10
+        result = result + 1
+      end
+      return result
     end
 
+    local max_length = 0
+    for index, title in ipairs(titles) do
+      max_length = math.max(max_length, utf8.len(title) + find_offset(index))
+    end
+
+    local index = 0
     local filename = select_item(files, {
       prompt = "Select note: ",
       format_item = function(filename)
+        index = index + 1
         local title = utils.extract_title(filename)
-        title = title .. string.rep(" ", max_length - utf8.len(title))
+        vim.print(title, index)
+        title = title
+          .. string.rep(" ", max_length - utf8.len(title) - find_offset(index))
 
         local keywords = table.concat(
           vim
